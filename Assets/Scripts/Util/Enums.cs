@@ -51,3 +51,9 @@ public enum EntityLifeState {
     run,
     exitTree,
 }
+
+public enum Nature {
+    gain,
+    neutral,
+    bad
+}

@@ -22,4 +22,7 @@
     <ItemGroup>
       <PackageReference Update="GodotSharpEditor" Version="4.1.2" />
     </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Assets\Scripts\Register\Entity\Skill" />
+    </ItemGroup>
 </Project>
