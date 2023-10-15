@@ -3,7 +3,7 @@ using RegisterSystem;
 
 namespace InTime;
 
-public class AllAllAttributeRecovery : RegisterManage<AttributeRecovery> {
+public class AllAttributeRecovery : RegisterManage<AttributeRecovery> {
     public static AttributeRecovery lifeRecovery;
     public static AttributeRecovery manaRecovery;
     public static AttributeRecovery tenacityRecovery;

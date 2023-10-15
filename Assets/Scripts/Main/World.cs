@@ -28,6 +28,7 @@ public class World : SingletonPatternClass<World> {
     protected GraftEventBus eventBus;
     protected GraftRegisterSystem registerSystem;
     protected EntityManage entityManage;
+    protected GraftJsonSerializer jsonSerializer;
 
     public World() {
         //加载所有组件
@@ -109,6 +110,8 @@ public class World : SingletonPatternClass<World> {
 
     public ILog getLog() => log;
     public EntityManage getEntityManage() => entityManage;
+
+    public GraftJsonSerializer getJsonSerializer() => jsonSerializer;
 }
 
 public class GraftEventBus : EventBus.EventBus, IWorldComponent {

@@ -18,12 +18,12 @@ public class AllAttributeControl : RegisterManage<AttributeControl> {
     /// 韧性
     /// </summary>
     public static AttributeControl tenacity;
-    
 
     public override Type getBasicsRegisterManageType() => typeof(AllAttribute);
-    
 }
 
 public class AttributeControl : Attribute {
     [FieldRegister] protected AttributeLimit attributeLimit;
+
+    public AttributeLimit getLimitAttribute() => attributeLimit;
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Godot;
 using RegisterSystem;
 
 namespace InTime;
@@ -98,5 +99,17 @@ public interface IFieldGetEntity {
 /// 实体注册，表明可以注册进实体内部的事件系统
 /// </summary>
 public interface IEntityEventBusRegister {
-        
+}
+
+public interface IDataStruct<T> {
+    T get();
+    void set(T v);
+}
+
+public interface IEntityHasTask {
+    TaskStack getTaskStack();
+}
+
+public interface IEntityLivingMaterialChange {
+    Material[] materialChange(EntityLiving entityLiving);
 }

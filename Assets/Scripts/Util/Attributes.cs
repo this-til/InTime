@@ -6,6 +6,10 @@ namespace InTime;
 public class ConfigField : System.Attribute {
 }
 
+[AttributeUsage(AttributeTargets.Field)]
+public class SaveField : System.Attribute {
+}
+
 [AttributeUsage(AttributeTargets.Method)]
 public class TimerCellCycleAttribute : System.Attribute {
     public TriggerType triggerType = TriggerType.fixedUpdate;

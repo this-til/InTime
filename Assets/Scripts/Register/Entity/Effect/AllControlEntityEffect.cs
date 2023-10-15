@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace InTime.Effect;
+namespace InTime;
 
 public class AllControlEntityEffect : CanConfigRegisterManage<ControlEntityEffect> {
     public override Type getBasicsRegisterManageType() => typeof(AllEntityEffect);

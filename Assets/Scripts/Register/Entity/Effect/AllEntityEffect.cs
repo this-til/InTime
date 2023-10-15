@@ -1,6 +1,10 @@
-﻿using RegisterSystem;
+﻿using System;
+using System.Collections.Generic;
+using Godot;
+using Newtonsoft.Json.Linq;
+using RegisterSystem;
 
-namespace InTime.Effect;
+namespace InTime;
 
 public class AllEntityEffect : CanConfigRegisterManage<EntityEffectBasics> {
 }
@@ -29,7 +33,7 @@ public class EntityEffectBasics : RegisterBasics, IDefaultConfig {
     /// <summary>
     /// 获取buff的流逝时间类型
     /// </summary>
-    public virtual ScaleManage.TimeType getEffectTimeType() => ScaleManage.TimeType.part;
+    public virtual TimeType getEffectTimeType() => TimeType.part;
 
     public virtual EntityEffectCell fuse(EntityEffectCell old, EntityEffectCell @new) {
         double oldMagnitude = old.level * old.time;
@@ -43,9 +47,6 @@ public class EntityEffectBasics : RegisterBasics, IDefaultConfig {
 
     protected virtual void onEventLivingAddEffect_effect(EntityLiving entityLiving, EntityEffectCell effectCell,
         Event.EventEntity.EventLiving.EventLivingEffect.EventLivingAddEffect @event) {
-        if (AllSetBool.不显示buff特效.isOpen()) {
-            return;
-        }
         if (effectCellEventPack is null) {
             return;
         }
@@ -84,7 +85,7 @@ public class EntityEffectBasics : RegisterBasics, IDefaultConfig {
     /// </summary>
     /// <param name="attackerEntity">发动攻击的实体</param>
     /// <param name="entityLiving">被攻击的实体</param>
-    protected virtual void onEventAttackEquipment_underAttack(EntityLiving entityLiving, [CanBeNull] Entity attackerEntity, EntityEffectCell entityEffectCell,
+    protected virtual void onEventAttackEquipment_underAttack(EntityLiving entityLiving, Entity? attackerEntity, EntityEffectCell entityEffectCell,
         AttackStack attackStack,
         Event.EventEntity.EventLiving.EventAttack.EventAttackEquipment @event) {
     }
@@ -114,7 +115,7 @@ public class EntityEffectBasics : RegisterBasics, IDefaultConfig {
     /// </summary>
     /// <param name="attackerEntity">发动攻击的实体</param>
     /// <param name="entityLiving">被攻击的实体</param>
-    protected virtual void onEventAttackEnd_underAttack(EntityLiving entityLiving, [CanBeNull] Entity attackerEntity, EntityEffectCell entityEffectCell,
+    protected virtual void onEventAttackEnd_underAttack(EntityLiving entityLiving, Entity? attackerEntity, EntityEffectCell entityEffectCell,
         AttackStack attackStack,
         Event.EventEntity.EventLiving.EventAttack.EventAttackEnd @event) {
     }
@@ -211,7 +212,7 @@ public class EntityEffectBasics : RegisterBasics, IDefaultConfig {
 
     public class EffectCellEventPack {
         public readonly EntityEffectBasics entityEffectBasics;
-        public readonly Map<string, PosEffectCell> effectCellMap;
+        public readonly Dictionary<string, PosEffectCell> effectCellMap;
 
         public EffectCellEventPack(EntityEffectBasics entityEffectBasics) {
             this.entityEffectBasics = entityEffectBasics;
@@ -223,24 +224,119 @@ public class EntityEffectBasics : RegisterBasics, IDefaultConfig {
     }
 }
 
+public class ShieldEntityEffect : EntityEffectBasics {
+    public Color color = new Color(1, 1, 1, 1);
+
+    public virtual double getShield(EntityEffectCell cell) => cell.getCustomData().getAsDouble(NBTTag.shield);
+
+    public virtual void setShield(EntityEffectCell cell, double d) => cell.getCustomData().Add(NBTTag.shield, d);
+
+    public virtual void addMultipleShield(EntityEffectCell cell, double d) => setShield(cell, (d + 1) * getShield(cell));
+
+    /// <summary>
+    /// 能够防护
+    /// </summary>
+    protected virtual bool canShield(EntityLiving entityLiving, EntityEffectCell effectCell) => true;
+
+    /// <summary>
+    /// 护盾抵消时
+    /// </summary>
+    protected virtual void shieldOffset(EntityLiving entityLiving, EntityEffectCell effectCell, double offset) {
+    }
+
+    /// <summary>
+    /// 护盾破碎时
+    /// </summary>
+    protected virtual void shieldFracture(EntityLiving entityLiving, EntityEffectCell effectCell) {
+    }
+
+    public static void onEvent(Event.EventEntity.EventLiving.EventAttack.EventAttackEquipmentOfShield @event) {
+        foreach (var keyValuePair in @event.entityLiving.forEffect()) {
+            ShieldEntityEffect shieldEntityEffect = keyValuePair.Key as ShieldEntityEffect;
+            if (shieldEntityEffect is null) {
+                return;
+            }
+            EntityEffectCell effectCell = keyValuePair.Value;
+            if (effectCell.isEmpty()) {
+                return;
+            }
+            if (!shieldEntityEffect.canShield(@event.entityLiving, effectCell)) {
+                return;
+            }
+            if (!new Event.EventEntity.EventLiving.EventShield.EventShieldCan(@event.entityLiving, @event.stack).onEvent().isResistAttack()) {
+                return;
+            }
+            double shieldValue = shieldEntityEffect.getShield(effectCell);
+            double consume = Math.Min(@event.stack.getAttack(), shieldValue);
+            shieldEntityEffect.shieldOffset(@event.entityLiving, effectCell, consume);
+            new Event.EventEntity.EventLiving.EventShield.EventShieldResist(@event.entityLiving, consume, shieldEntityEffect, effectCell, @event.stack).onEvent();
+            shieldEntityEffect.setShield(effectCell, shieldValue - consume);
+            if (consume > @event.stack.getAttack()) {
+                @event.cancellationAttack();
+            }
+            else {
+                @event.stack.addAttack(-consume);
+            }
+            if (shieldEntityEffect.getShield(effectCell) < 0) {
+                new Event.EventEntity.EventLiving.EventShield.EventShieldAttackFractureFracture(@event.entityLiving, shieldValue, shieldEntityEffect, effectCell,
+                    @event.stack).onEvent();
+                @event.entityLiving.clear(shieldEntityEffect);
+            }
+        }
+    }
+
+    public static void onEvent(Event.EventEntity.EventLiving.EventShield.EventShieldResist @event) {
+        if (@event.effect.effectCellEventPack is null) {
+            return;
+        }
+        foreach (var keyValuePair in @event.effect.effectCellEventPack.effectCellMap) {
+            EffectShieldBasics shieldBasicsEffect = @event.entityLiving.getSonEntity(keyValuePair.Key) as EffectShieldBasics;
+            if (shieldBasicsEffect is null) {
+                continue;
+            }
+            shieldBasicsEffect.beBeaten(@event.attackStack, @event);
+        }
+    }
+
+    /// <summary>
+    /// 护盾破碎
+    /// </summary>
+    /// <param name="event"></param>
+    public virtual void onEvent(Event.EventEntity.EventLiving.EventShield.EventShieldFracture @event) {
+        @event.effect.shieldFracture(@event.entityLiving, @event.effectCell);
+    }
+
+    /// <summary>
+    /// 护盾被清除时发布护盾破碎事件
+    /// </summary>
+    /// <param name="event"></param>
+    public static void _onEvent(Event.EventEntity.EventLiving.EventLivingEffect.EventLivingClearEffect.EventLivingNatureClearEffect @event) {
+        ShieldEntityEffect shieldEntityEffect = @event.effect as ShieldEntityEffect;
+        if (shieldEntityEffect is null) {
+            return;
+        }
+        new Event.EventEntity.EventLiving.EventShield.EventShieldFracture(@event.entityLiving, @event.effectCell.level, shieldEntityEffect, @event.effectCell).onEvent();
+    }
+}
+
 public class EntityEffectCell {
     public static EntityEffectCell empty = new EntityEffectCell(0, 0);
 
     public double level;
     public float time;
-    [CanBeNull] [SerializeField] protected NBTTag nbtTag;
+    protected JObject? customData;
 
-    public EntityEffectCell(double level, float time, [CanBeNull] NBTTag nbtTag = null) {
+    public EntityEffectCell(double level, float time, JObject customData = null) {
         this.level = level;
         this.time = time;
-        this.nbtTag = nbtTag;
+        this.customData = customData;
     }
 
     public EntityEffectCell copy() {
-        return new EntityEffectCell(level, time, nbtTag is not null ? new NBTTag(nbtTag) : null);
+        return new EntityEffectCell(level, time, (JObject)customData?.DeepClone());
     }
 
-    public NBTTag getNBTTag() => nbtTag ??= new NBTTag();
+    public JObject getCustomData() => customData ??= new JObject();
 
     /// <summary>
     /// 判断效果是不是有效

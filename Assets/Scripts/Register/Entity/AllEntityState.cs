@@ -213,8 +213,8 @@ public class BeControlEntityState : EntityState {
 }
 
 public class SkillEntityState : EntityState {
-    [Asset] [CanBeNull] [SerializeField] protected SkillBasics skillBasics;
-    [SerializeField] protected SkillBasics.EffectType effectType;
+    protected internal SkillBasics skillBasics;
+    protected EffectType effectType;
 
     [Event(priority = -300)]
     protected void onEvent(Event.EventEntity.EventLiving.EventSkill.EventSkillCell.EventSkillGet @event) {
@@ -222,8 +222,8 @@ public class SkillEntityState : EntityState {
             return;
         }
         switch (effectType) {
-            case SkillBasics.EffectType.hasCd when @event.skillCell.cd <= 0:
-            case SkillBasics.EffectType.noCD when @event.skillCell.cd > 0:
+            case EffectType.hasCd when @event.skillCell.cd <= 0:
+            case EffectType.noCD when @event.skillCell.cd > 0:
                 return;
         }
         @event.entityLiving.set(this, true);
@@ -243,11 +243,11 @@ public class SkillEntityState : EntityState {
             return;
         }
         switch (effectType) {
-            case SkillBasics.EffectType.hasCd:
+            case EffectType.hasCd:
                 @event.entityLiving.set(this, true);
                 break;
 
-            case SkillBasics.EffectType.noCD:
+            case EffectType.noCD:
                 @event.entityLiving.set(this, false);
                 break;
         }
@@ -259,10 +259,10 @@ public class SkillEntityState : EntityState {
             return;
         }
         switch (effectType) {
-            case SkillBasics.EffectType.noCD:
+            case EffectType.noCD:
                 @event.entityLiving.set(this, true);
                 break;
-            case SkillBasics.EffectType.hasCd:
+            case EffectType.hasCd:
                 @event.entityLiving.set(this, false);
                 break;
         }
