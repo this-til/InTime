@@ -190,10 +190,10 @@ public class AttributeStack {
 	/// <summary>
 	/// 设置本身值
 	/// </summary>
-	public double set(AttributeLimit attribute, double d) => limitValue.put(attribute, math.clamp(d, 0, get(attribute.getAttributeControl())));
+	public double set(AttributeLimit attribute, double d) => limitValue.put(attribute, Math.Clamp(d, 0, get(attribute.getAttributeControl())));
 
 	/// <summary>
 	/// 在本身值上做更改
 	/// </summary>
-	public double add(AttributeLimit attribute, double d) => limitValue.put(attribute, math.clamp(get(attribute) + d, 0, get(attribute.getAttributeControl())));
+	public double add(AttributeLimit attribute, double d) => limitValue.put(attribute, Math.Clamp(get(attribute) + d, 0, get(attribute.getAttributeControl())));
 }

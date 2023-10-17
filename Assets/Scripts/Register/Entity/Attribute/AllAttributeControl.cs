@@ -25,5 +25,10 @@ public class AllAttributeControl : RegisterManage<AttributeControl> {
 public class AttributeControl : Attribute {
     [FieldRegister] protected AttributeLimit attributeLimit;
 
+    public override void awakeInit() {
+        base.awakeInit();
+        attributeLimit.attributeControl = this;
+    }
+
     public AttributeLimit getLimitAttribute() => attributeLimit;
 }

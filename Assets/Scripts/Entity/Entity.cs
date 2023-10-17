@@ -4,6 +4,7 @@ using EventBus;
 using Godot;
 using Godot.Collections;
 using log4net;
+using Newtonsoft.Json.Linq;
 
 namespace InTime;
 
@@ -58,19 +59,27 @@ public partial class Entity : Node3D {
 	/// </summary>
 	protected Node? baseNode;
 
+	/// <summary>
+	/// 自定义数据
+	/// </summary>
+	[SaveField] protected JObject? customData = new JObject();
+
+	protected readonly Random random = new Random();
+
 	public sealed override void _EnterTree() {
 		base._EnterTree();
 		baseNode = GetParent();
 		entityLifeState = EntityLifeState.enterTree;
 		enterTreeNecessary();
 		enterTreeInit();
+		enterTreeReflex();
 		enterTreeEnd();
 		new Event.EventEntity.EventEntityAwake(this).onEvent();
 	}
 
 	protected void enterTreeNecessary() {
 		entityId = World.getInstance().getEntityManage().nextEntityID();
-		eventsRunPackGather.setLog(LogManager.GetLogger("Entity", "EventBus"));
+		eventsRunPackGather.setLog(LogOut.getInstance());
 		eventsRunPackGather.put(this);
 	}
 
@@ -310,14 +319,6 @@ public partial class Entity : Node3D {
 		TimeType timeType = TimeType.part) =>
 		timeRun.addTimerCell(new TimerCell(action, triggerType, timeType, i, true, permanent, priority));
 
-	public float getTimeScale() => timeScale;
-
-	public float getLifeTime() => lifeTime;
-
-	public Entity? getBasicsEntity() => basicsEntity;
-
-	public IEventBus getEntityEventBus() => eventsRunPackGather;
-
 	protected virtual void setRunBasicsEntity(Entity? entity, string sonEntityName) {
 		if (entity is null) {
 			basicsEntity = null;
@@ -330,6 +331,18 @@ public partial class Entity : Node3D {
 		basicsEntity = entity;
 		workSonEntityName = sonEntityName;
 	}
+
+	public float getTimeScale() => timeScale;
+
+	public float getLifeTime() => lifeTime;
+
+	public Entity? getBasicsEntity() => basicsEntity;
+
+	public IEventBus getEntityEventBus() => eventsRunPackGather;
+
+	public JObject? getCustomData() => customData;
+
+	public Random getRandom() => random;
 
 	public int getEntityID() => entityId;
 

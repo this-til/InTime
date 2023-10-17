@@ -13,6 +13,7 @@
         <Content Include="Assets\Scene\Main.tscn" />
         <PackageReference Include="log4net" Version="2.0.15" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+        <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
     </ItemGroup>
     <ItemGroup>
       <PackageReference Update="Godot.SourceGenerators" Version="4.1.2" />

@@ -9,7 +9,7 @@ public class AllSkill : CanConfigRegisterManage<SkillBasics> {
 }
 
 public abstract class SkillBasics : RegisterBasics, IDefaultConfig {
-    protected Dictionary<string, SkillStateEffectCell> effectCells;
+    //protected Dictionary<string, SkillStateEffectCell>? effectCells;
     protected internal TimeType timeType = TimeType.part;
 
     public virtual void defaultConfig() {
@@ -25,7 +25,8 @@ public abstract class SkillBasics : RegisterBasics, IDefaultConfig {
 
     protected virtual void onEventSkillGet_effect(EntityLiving entityLiving, SkillCell skillCell,
         Event.EventEntity.EventLiving.EventSkill.EventSkillCell.EventSkillGet @event) {
-        if (effectCellEventPack is null) {
+        //TODO
+        /*if (effectCellEventPack is null) {
             return;
         }
         if (skillCell.level < 0) {
@@ -39,7 +40,7 @@ public abstract class SkillBasics : RegisterBasics, IDefaultConfig {
                 return;
             }
             kv.Value.create(entityLiving, kv.Key);
-        }
+        }*/
     }
 
     protected virtual void onEventSkillLose(EntityLiving entityLiving, SkillCell skillCell, Event.EventEntity.EventLiving.EventSkill.EventSkillCell.EventSkillLose @event) {
@@ -47,7 +48,8 @@ public abstract class SkillBasics : RegisterBasics, IDefaultConfig {
 
     protected virtual void onEventSkillLose_effect(EntityLiving entityLiving, SkillCell skillCell,
         Event.EventEntity.EventLiving.EventSkill.EventSkillCell.EventSkillLose @event) {
-        if (effectCellEventPack is null) {
+        //TODO
+        /*if (effectCellEventPack is null) {
             return;
         }
         foreach (var kv in effectCellEventPack.effectCells) {
@@ -55,7 +57,7 @@ public abstract class SkillBasics : RegisterBasics, IDefaultConfig {
                 return;
             }
             entityLiving.clearSonEntity(kv.Key);
-        }
+        }*/
     }
 
     protected virtual void onEventSkillSetNewCd(EntityLiving entityLiving, SkillCell skillCell,
@@ -64,7 +66,8 @@ public abstract class SkillBasics : RegisterBasics, IDefaultConfig {
 
     protected virtual void onEventSkillSetNewCd_effect(EntityLiving entityLiving, SkillCell skillCell,
         Event.EventEntity.EventLiving.EventSkill.EventSkillCell.EventSkillSetNewCd @event) {
-        if (effectCellEventPack is null) {
+        //TODO
+        /*if (effectCellEventPack is null) {
             return;
         }
         foreach (var kv in effectCellEventPack.effectCells) {
@@ -77,7 +80,7 @@ public abstract class SkillBasics : RegisterBasics, IDefaultConfig {
             if (kv.Value.effectType.Equals(EffectType.hasCd)) {
                 kv.Value.create(entityLiving, kv.Key);
             }
-        }
+        }*/
     }
 
     protected virtual void onEventSkillToNoCd(EntityLiving entityLiving, SkillCell skillCell,
@@ -86,7 +89,8 @@ public abstract class SkillBasics : RegisterBasics, IDefaultConfig {
 
     protected virtual void onEventSkillToNoCd_effect(EntityLiving entityLiving, SkillCell skillCell,
         Event.EventEntity.EventLiving.EventSkill.EventSkillCell.EventSkillToNoCd @event) {
-        if (effectCellEventPack is null) {
+        //TODO
+        /*if (effectCellEventPack is null) {
             return;
         }
         foreach (var kv in effectCellEventPack.effectCells) {
@@ -99,7 +103,7 @@ public abstract class SkillBasics : RegisterBasics, IDefaultConfig {
                 }
                 entityLiving.clearSonEntity(kv.Key);
             }
-        }
+        }*/
     }
 
     protected virtual void onEventCatchAttribute(EntityLiving entityLiving, SkillCell skillCell, Event.EventEntity.EventLiving.EventAttribute.EventCatchAttribute @event) {

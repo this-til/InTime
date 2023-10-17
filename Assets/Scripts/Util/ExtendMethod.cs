@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using EventBus;
 using Godot;
+using Newtonsoft.Json.Linq;
 
 namespace InTime;
 
@@ -27,7 +28,6 @@ public static class ArrayExtendMethod {
 }
 
 public static class EntityExtendMethod {
-
     /// <summary>
     /// 货取实体中心点
     /// </summary>
@@ -200,8 +200,6 @@ public static class DictionaryExtendMethod {
     }
 
     public static bool isEmpty<K, V>(this Dictionary<K, V> dictionary) => dictionary.Count <= 0;
-
-    public static V random<K, V>(this Dictionary<K, V> dictionary, RandomExtend random) => dictionary.ElementAt(random.NextInt(Count)).Value;
 }
 
 public static class StackExtendMethod {
@@ -239,4 +237,68 @@ public static class NumberExtendMethod {
     /// 门槛检测，当f的绝对值是大于t时返回f，不然返回0
     /// </summary>
     public static double threshold(this double f, double l) => f > l || f < -l ? f : 0;
+}
+
+public static class QuaternionExtendMethod {
+    public static readonly Vector3 up = new Vector3(0, 1, 0);
+
+    public static Quaternion LookRotation(Vector3 forward, Vector3 upwards) {
+        Vector3 right = forward.Cross(upwards).Normalized(); // 计算右方向向量
+        Vector3 newUp = right.Cross(forward).Normalized(); // 计算新的上方向向量
+        float m00 = right.X;
+        float m01 = right.Y;
+        float m02 = right.Z;
+        float m10 = newUp.X;
+        float m11 = newUp.Y;
+        float m12 = newUp.Z;
+        float m20 = forward.X;
+        float m21 = forward.Y;
+        float m22 = forward.Z;
+
+        float num8 = m00 + m11 + m22;
+        Quaternion rotation = new Quaternion();
+
+        if (num8 > 0f) {
+            float num = Mathf.Sqrt(num8 + 1f);
+            rotation.W = num * 0.5f;
+            num = 0.5f / num;
+            rotation.X = (m12 - m21) * num;
+            rotation.Y = (m20 - m02) * num;
+            rotation.Z = (m01 - m10) * num;
+        }
+        else if (m00 >= m11 && m00 >= m22) {
+            float num7 = Mathf.Sqrt(1f + m00 - m11 - m22);
+            float num4 = 0.5f / num7;
+            rotation.X = 0.5f * num7;
+            rotation.Y = (m01 + m10) * num4;
+            rotation.Z = (m02 + m20) * num4;
+            rotation.W = (m12 - m21) * num4;
+        }
+        else if (m11 > m22) {
+            float num6 = Mathf.Sqrt(1f + m11 - m00 - m22);
+            float num3 = 0.5f / num6;
+            rotation.X = (m10 + m01) * num3;
+            rotation.Y = 0.5f * num6;
+            rotation.Z = (m21 + m12) * num3;
+            rotation.W = (m20 - m02) * num3;
+        }
+        else {
+            float num5 = Mathf.Sqrt(1f + m22 - m00 - m11);
+            float num2 = 0.5f / num5;
+            rotation.X = (m20 + m02) * num2;
+            rotation.Y = (m21 + m12) * num2;
+            rotation.Z = 0.5f * num5;
+            rotation.W = (m01 - m10) * num2;
+        }
+        return rotation;
+    }
+}
+
+public static class JObjectExtendMethod {
+    public static T? gatAs<T>(this JObject jObject, string key) {
+        if (jObject.ContainsKey(key)) {
+            return jObject[key]!.Value<T>();
+        }
+        return default;
+    }
 }

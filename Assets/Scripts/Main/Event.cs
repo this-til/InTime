@@ -990,55 +990,6 @@ public abstract class Event : EventBus.Event {
             }
 
             /// <summary>
-            /// 关于玩家对话
-            /// </summary>
-            /*
-            public abstract class EventPlayerDialogue : EventLiving {
-                public readonly DialogueNodeGraph dialogueNodeGraph;
-
-                public EventPlayerDialogue(EntityLiving entityLiving, DialogueNodeGraph dialogueNodeGraph) : base(entityLiving) {
-                    this.dialogueNodeGraph = dialogueNodeGraph;
-                }
-
-                /// <summary>
-                /// 这一小段对话结束
-                /// </summary>
-                public class EventDialogueEnd : EventPlayerDialogue {
-                    public EventDialogueEnd(EntityPlayer entityLiving, DialogueNodeGraph dialogueNodeGraph) :
-                        base(entityLiving, dialogueNodeGraph) {
-                    }
-                }
-
-                /// <summary>
-                /// 一小段对话开始
-                /// </summary>
-                public class EventDialogueStart : EventPlayerDialogue {
-                    public EventDialogueStart(EntityPlayer entityLiving, DialogueNodeGraph dialogueNodeGraph) :
-                        base(entityLiving, dialogueNodeGraph) {
-                    }
-                }
-
-                /// <summary>
-                /// 全部对话结束
-                /// </summary>
-                public class EventDialogueAllEnd : EventPlayerDialogue {
-                    public EventDialogueAllEnd(EntityPlayer entityLiving, DialogueNodeGraph dialogueNodeGraph) :
-                        base(entityLiving, dialogueNodeGraph) {
-                    }
-                }
-
-                /// <summary>
-                /// 全部对话开始
-                /// </summary>
-                public class EventDialogueAllStart : EventPlayerDialogue {
-                    public EventDialogueAllStart(EntityPlayer entityLiving, DialogueNodeGraph dialogueNodeGraph)
-                        : base(entityLiving, dialogueNodeGraph) {
-                    }
-                }
-            }
-            */
-
-            /// <summary>
             /// 有关技能的
             /// </summary>
             public abstract class EventSkill : EventLiving {
@@ -1221,7 +1172,7 @@ public abstract class Event : EventBus.Event {
                     /// <summary>
                     /// 下一段动画 
                     /// </summary>
-                    [CanBeNull] protected AnimationPlayableBehaviour next;
+                     protected AnimationPlayableBehaviour? next;
 
                     public EventSettlementNextAnimation(EntityLiving entityLiving, AnimationPlayableBehaviour animationPlayableBehaviour) : base(entityLiving,
                         animationPlayableBehaviour) {
@@ -1229,8 +1180,7 @@ public abstract class Event : EventBus.Event {
 
                     public override bool isContinue() => next is null;
 
-                    [CanBeNull]
-                    public AnimationPlayableBehaviour getNextAnimation() => next;
+                    public AnimationPlayableBehaviour? getNextAnimation() => next;
 
                     public void setNextAnimationPlayableBehaviour(AnimationPlayableBehaviour _animationPlayableBehaviour) => next = _animationPlayableBehaviour;
                 }

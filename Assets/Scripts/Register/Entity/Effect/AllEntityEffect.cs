@@ -7,33 +7,27 @@ using RegisterSystem;
 namespace InTime;
 
 public class AllEntityEffect : CanConfigRegisterManage<EntityEffectBasics> {
+    public static EntityEffectTimeScale effectTimeScale;
 }
 
 public class EntityEffectBasics : RegisterBasics, IDefaultConfig {
-    [SerializeField] protected ArrayList<PosEffectCell> effects;
-    [CanBeNull] protected EffectCellEventPack effectCellEventPack;
-
-    public override void init(ReflexAssetsManage reflexAssetsManage) {
-        base.init(reflexAssetsManage);
-        if (effects.isEmpty()) {
-            return;
-        }
-        effectCellEventPack = new EffectCellEventPack(this);
-    }
+    protected TimeType timeType = TimeType.part;
+    protected Nature nature = Nature.neutral;
 
     /// <summary>
     /// 从注册对象获得当前buff的性质，用于玩些骚操作
     /// </summary>
     /// <param name="effectCell"></param>
     /// <returns></returns>
-    public virtual Nature getNature(EntityEffectCell effectCell) {
-        return Nature.neutral;
-    }
+    public virtual Nature getNature(EntityEffectCell effectCell) => nature;
 
     /// <summary>
     /// 获取buff的流逝时间类型
     /// </summary>
-    public virtual TimeType getEffectTimeType() => TimeType.part;
+    public virtual TimeType getEffectTimeType(EntityEffectCell effectCell) => timeType;
+
+    public virtual void defaultConfig() {
+    }
 
     public virtual EntityEffectCell fuse(EntityEffectCell old, EntityEffectCell @new) {
         double oldMagnitude = old.level * old.time;
@@ -47,12 +41,13 @@ public class EntityEffectBasics : RegisterBasics, IDefaultConfig {
 
     protected virtual void onEventLivingAddEffect_effect(EntityLiving entityLiving, EntityEffectCell effectCell,
         Event.EventEntity.EventLiving.EventLivingEffect.EventLivingAddEffect @event) {
-        if (effectCellEventPack is null) {
+        //TODO
+        /*if (effectCellEventPack is null) {
             return;
         }
         foreach (var kv in effectCellEventPack.effectCellMap) {
             kv.Value.create(@event.entityLiving, kv.Key);
-        }
+        }*/
     }
 
     protected virtual void onEventLivingClearEffect(EntityLiving entityLiving, EntityEffectCell effectCell,
@@ -61,7 +56,8 @@ public class EntityEffectBasics : RegisterBasics, IDefaultConfig {
 
     protected virtual void onEventLivingClearEffect_effect(EntityLiving entityLiving, EntityEffectCell effectCell,
         Event.EventEntity.EventLiving.EventLivingEffect.EventLivingClearEffect @event) {
-        if (effectCellEventPack is null) {
+        //TODO
+        /*if (effectCellEventPack is null) {
             return;
         }
         foreach (var kv in effectCellEventPack.effectCellMap) {
@@ -69,7 +65,7 @@ public class EntityEffectBasics : RegisterBasics, IDefaultConfig {
                 return;
             }
             @event.entityLiving.clearSonEntity(kv.Key);
-        }
+        }*/
     }
 
     protected virtual void onEventCatchAttribute(EntityLiving entityLiving, EntityEffectCell effectCell,
@@ -209,27 +205,18 @@ public class EntityEffectBasics : RegisterBasics, IDefaultConfig {
             }
         }
     }
+}
 
-    public class EffectCellEventPack {
-        public readonly EntityEffectBasics entityEffectBasics;
-        public readonly Dictionary<string, PosEffectCell> effectCellMap;
-
-        public EffectCellEventPack(EntityEffectBasics entityEffectBasics) {
-            this.entityEffectBasics = entityEffectBasics;
-            effectCellMap = new Map<string, PosEffectCell>(entityEffectBasics.effects.Count);
-            for (var i = 0; i < entityEffectBasics.effects.Count; i++) {
-                effectCellMap.Add($"effect.{entityEffectBasics.getName()}.{i}", entityEffectBasics.effects[i]);
-            }
-        }
-    }
+public class EntityEffectTimeScale : EntityEffectBasics {
+    public override Nature getNature(EntityEffectCell effectCell) => Nature.neutral;
 }
 
 public class ShieldEntityEffect : EntityEffectBasics {
     public Color color = new Color(1, 1, 1, 1);
 
-    public virtual double getShield(EntityEffectCell cell) => cell.getCustomData().getAsDouble(NBTTag.shield);
+    public virtual double getShield(EntityEffectCell cell) => cell.getCustomData().gatAs<double>(StringPrefab.shield);
 
-    public virtual void setShield(EntityEffectCell cell, double d) => cell.getCustomData().Add(NBTTag.shield, d);
+    public virtual void setShield(EntityEffectCell cell, double d) => cell.getCustomData().Add(StringPrefab.shield, d);
 
     public virtual void addMultipleShield(EntityEffectCell cell, double d) => setShield(cell, (d + 1) * getShield(cell));
 
@@ -286,7 +273,8 @@ public class ShieldEntityEffect : EntityEffectBasics {
     }
 
     public static void onEvent(Event.EventEntity.EventLiving.EventShield.EventShieldResist @event) {
-        if (@event.effect.effectCellEventPack is null) {
+        //TODO
+        /*if (@event.effect.effectCellEventPack is null) {
             return;
         }
         foreach (var keyValuePair in @event.effect.effectCellEventPack.effectCellMap) {
@@ -295,7 +283,7 @@ public class ShieldEntityEffect : EntityEffectBasics {
                 continue;
             }
             shieldBasicsEffect.beBeaten(@event.attackStack, @event);
-        }
+        }*/
     }
 
     /// <summary>

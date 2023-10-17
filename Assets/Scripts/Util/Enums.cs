@@ -156,26 +156,31 @@ public enum AnimationType {
 /// <summary>
 /// 限制类型
 /// </summary>
-public enum AnimationLimitType {
+public enum AnimationState {
+    /// <summary>
+    /// 在过渡
+    /// </summary>
+    excessive,
+
     /// <summary>
     /// 前摇
     /// </summary>
-    forwardSway = 0,
+    forwardSway,
 
     /// <summary>
     /// 正常
     /// </summary>
-    normal = 1,
+    normal,
 
     /// <summary>
     /// 后摇
     /// </summary>
-    backSway = 2,
-
+    backSway,
+    
     /// <summary>
     /// 结束
     /// </summary>
-    end = 3,
+    end
 }
 
 public enum AnimationLimitLevel {

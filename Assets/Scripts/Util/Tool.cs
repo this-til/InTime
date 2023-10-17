@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using Godot;
+using log4net;
+using RegisterSystem;
 
 namespace InTime;
 
@@ -103,9 +106,11 @@ public class ValueUtil {
             if (d1 == 0) {
                 continue;
             }
-            Multiple multiple = World.getWorld().getReflexManage().getRegisterManageOfClass<AllMultiple>().getByIndex(index);
-            d1 = multiple.limit(d1);
-            d *= d1 + 1;
+            Multiple? multiple = World.getInstance().getRegisterSystem().getRegisterManageOfManageType<AllMultiple>()?.getByIndex(index);
+            if (multiple is not null) {
+                d1 = multiple.limit(d1);
+                d *= d1 + 1;
+            }
         }
         return d;
     }
@@ -141,7 +146,6 @@ public class DataStruct<K> : IDataStruct<K> {
 
     public static implicit operator K(DataStruct<K> v) => v.a;
 }
-
 
 public class DataStruct<K, V> {
     public K k;
@@ -214,5 +218,161 @@ public class DataStruct<A, B, C, D, E, F> {
         this.d = d;
         this.e = e;
         this.f = f;
+    }
+}
+
+public class LogOut :SingletonPatternClass<LogOut>, ILogOut, EventBus.ILogOut, RegisterSystem.ILogOut {
+    void ILogOut.Debug(object message) {
+        GD.Print(message);
+    }
+
+    void EventBus.ILogOut.Debug(object message) {
+        GD.Print(message);
+    }
+
+    void RegisterSystem.ILogOut.Debug(object message) {
+        GD.Print(message);
+    }
+
+    void ILogOut.Debug(object message, Exception exception) {
+        GD.Print(message, exception);
+    }
+
+    void EventBus.ILogOut.Debug(object message, Exception exception) {
+        GD.Print(message, exception);
+    }
+
+    void RegisterSystem.ILogOut.Debug(object message, Exception exception) {
+        GD.Print(message, exception);
+    }
+
+    void ILogOut.Info(object message) {
+        GD.Print(message);
+    }
+
+    void EventBus.ILogOut.Info(object message) {
+        GD.Print(message);
+    }
+
+    void RegisterSystem.ILogOut.Info(object message) {
+        GD.Print(message);
+    }
+
+    void ILogOut.Info(object message, Exception exception) {
+        GD.Print(message, exception);
+    }
+
+    void EventBus.ILogOut.Info(object message, Exception exception) {
+        GD.Print(message, exception);
+    }
+
+    void RegisterSystem.ILogOut.Info(object message, Exception exception) {
+        GD.Print(message, exception);
+    }
+
+    void ILogOut.Warn(object message) {
+        GD.PrintRaw(message);
+    }
+
+    void EventBus.ILogOut.Warn(object message) {
+        GD.PrintRaw(message);
+    }
+
+    void RegisterSystem.ILogOut.Warn(object message) {
+        GD.PrintRaw(message);
+    }
+
+    void ILogOut.Warn(object message, Exception exception) {
+        GD.PrintRaw(message, exception);
+    }
+
+    void EventBus.ILogOut.Warn(object message, Exception exception) {
+        GD.PrintRaw(message, exception);
+    }
+
+    void RegisterSystem.ILogOut.Warn(object message, Exception exception) {
+        GD.PrintRaw(message, exception);
+    }
+
+    void ILogOut.Error(object message) {
+        GD.PrintErr(message);
+    }
+
+    void EventBus.ILogOut.Error(object message) {
+        GD.PrintErr(message);
+    }
+
+    void RegisterSystem.ILogOut.Error(object message) {
+        GD.PrintErr(message);
+    }
+
+    void ILogOut.Error(object message, Exception exception) {
+        GD.PrintErr(message, exception);
+    }
+
+    void EventBus.ILogOut.Error(object message, Exception exception) {
+        GD.PrintErr(message, exception);
+    }
+
+    void RegisterSystem.ILogOut.Error(object message, Exception exception) {
+        GD.PrintErr(message, exception);
+    }
+}
+
+public static class MathUtil {
+    public static float SmoothDampAngle(
+        float current,
+        float target,
+        ref float currentVelocity,
+        float smoothTime,
+        float maxSpeed,
+        float deltaTime) {
+        target = current + DeltaAngle(current, target);
+        return SmoothDamp(current, target, ref currentVelocity, smoothTime, maxSpeed, deltaTime);
+    }
+
+    /// <summary>
+    ///   <para>Calculates the shortest difference between two given angles given in degrees.</para>
+    /// </summary>
+    /// <param name="current"></param>
+    /// <param name="target"></param>
+    public static float DeltaAngle(float current, float target) {
+        float num = Repeat(target - current, 360f);
+        if (num > 180.0)
+            num -= 360f;
+        return num;
+    }
+
+    /// <summary>
+    ///   <para>Loops the value t, so that it is never larger than length and never smaller than 0.</para>
+    /// </summary>
+    /// <param name="t"></param>
+    /// <param name="length"></param>
+    public static float Repeat(float t, float length) => Mathf.Clamp(t - Mathf.Floor(t / length) * length, 0.0f, length);
+
+    public static float SmoothDamp(
+        float current,
+        float target,
+        ref float currentVelocity,
+        float smoothTime,
+        float maxSpeed,
+        float deltaTime) {
+        smoothTime = Mathf.Max(0.0001f, smoothTime);
+        float num1 = 2f / smoothTime;
+        float num2 = num1 * deltaTime;
+        float num3 = (float)(1.0 / (1.0 + (double)num2 + 0.479999989271164 * (double)num2 * (double)num2 + 0.234999999403954 * (double)num2 * (double)num2 * (double)num2));
+        float num4 = current - target;
+        float num5 = target;
+        float max = maxSpeed * smoothTime;
+        float num6 = Mathf.Clamp(num4, -max, max);
+        target = current - num6;
+        float num7 = (currentVelocity + num1 * num6) * deltaTime;
+        currentVelocity = (currentVelocity - num1 * num7) * num3;
+        float num8 = target + (num6 + num7) * num3;
+        if ((double)num5 - (double)current > 0.0 == (double)num8 > (double)num5) {
+            num8 = num5;
+            currentVelocity = (num8 - num5) / deltaTime;
+        }
+        return num8;
     }
 }

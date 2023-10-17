@@ -1,6 +1,7 @@
 ﻿namespace InTime;
 
 public class StringPrefab {
+    public const string shield = "shield";
 }
 
 public class LayerPrefab {

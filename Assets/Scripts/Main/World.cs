@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Xml;
 using EventBus;
 using log4net;
+using log4net.Config;
 using RegisterSystem;
-using log4net.Core;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -23,14 +23,13 @@ public class World : SingletonPatternClass<World> {
 
     protected readonly ILog log = LogManager.GetLogger(typeof(World));
 
-    protected Version version = Assembly.GetEntryAssembly()!.GetName().Version;
-
     protected GraftEventBus eventBus;
     protected GraftRegisterSystem registerSystem;
     protected EntityManage entityManage;
     protected GraftJsonSerializer jsonSerializer;
 
     public World() {
+
         //加载所有组件
         foreach (var type in Assembly.GetExecutingAssembly().GetTypes()) {
             if (type.IsAbstract) {
@@ -54,7 +53,7 @@ public class World : SingletonPatternClass<World> {
             if (!typeof(IWorldComponent).IsAssignableFrom(type)) {
                 continue;
             }
-            worldComponents.Add(type, (IWorldComponent)Activator.CreateInstance(type));
+            worldComponents.Add(type, (IWorldComponent)Activator.CreateInstance(type)!);
         }
 
         voluntarilyAssignment(this);
@@ -102,8 +101,6 @@ public class World : SingletonPatternClass<World> {
         }
     }
 
-    public Version getVersion() => version;
-
     public IEventBus getEventBus() => eventBus;
 
     public RegisterSystem.RegisterSystem getRegisterSystem() => registerSystem;
@@ -116,6 +113,10 @@ public class World : SingletonPatternClass<World> {
 
 public class GraftEventBus : EventBus.EventBus, IWorldComponent {
     public int getExecutionOrderList() => Int32.MaxValue;
+
+    protected void onEvent(Event.EventWorld.EventWorldInit.EventComponentInitBasics<GraftEventBus>.EventComponentInit @event) {
+        setLog(LogOut.getInstance());
+    }
 }
 
 public class GraftRegisterSystem : RegisterSystem.RegisterSystem, IWorldComponent {
@@ -123,6 +124,7 @@ public class GraftRegisterSystem : RegisterSystem.RegisterSystem, IWorldComponen
     protected ConfigManage configManage;
 
     protected void onEvent(Event.EventWorld.EventWorldInit.EventComponentInitBasics<GraftRegisterSystem>.EventComponentInit @event) {
+        initLog(LogOut.getInstance());
         initAddAllManagedAssembly(GetType().Assembly);
         initAddAllManagedAssembly(typeof(World).Assembly);
         initAddRegisterManageAwakeInitEvent(graftEventBus.put);
@@ -223,6 +225,8 @@ public class GraftJsonSerializer : JsonSerializer, IWorldComponent {
 public class ConfigManage : IWorldComponent {
     protected GraftJsonSerializer graftJsonSerializer;
 
+    protected Version version;
+
     protected readonly Dictionary<IDefaultConfig, FileInfo> needWrite = new Dictionary<IDefaultConfig, FileInfo>();
 
     protected readonly DirectoryInfo folder = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory + "/config");
@@ -230,7 +234,7 @@ public class ConfigManage : IWorldComponent {
     public FileInfo mackFile(IDefaultConfig registerBasics) {
         FileInfo fileInfo =
             new FileInfo(Path.Combine(
-                $"{folder.FullName}/{World.getInstance().getVersion().ToString()}/{registerBasics.getAsRegisterBasics().getRegisterManage().getCompleteName()}",
+                $"{folder.FullName}/{version.ToString()}/{registerBasics.getAsRegisterBasics().getRegisterManage().getCompleteName()}",
                 $"{registerBasics.getAsRegisterBasics().getName()}.json"));
         return fileInfo;
     }
@@ -259,6 +263,7 @@ public class ConfigManage : IWorldComponent {
     }
 
     protected void onEvent(Event.EventWorld.EventWorldInit.EventComponentInitBasics<ConfigManage>.EventComponentInitBack @event) {
+        version = Assembly.GetEntryAssembly()!.GetName().Version;
         foreach (var keyValuePair in needWrite) {
             string s = graftJsonSerializer.serialize(keyValuePair.Key, info => info.GetCustomAttribute<ConfigField>() is not null);
             writeFile(keyValuePair.Value, s);
@@ -328,12 +333,12 @@ public class EntityManage : EntityManageBasics<Entity> {
         useEntityID++;
         return useEntityID;
     }
-    
+
     /// <summary>
     /// 通过id获取实体
     /// </summary>
     public Entity? getEntity(int id) {
-        Entity _entity = null;
+        Entity? _entity = null;
         foreach (var entity1 in entity) {
             if (entity1.getEntityID().Equals(id)) {
                 _entity = entity1;
@@ -341,5 +346,4 @@ public class EntityManage : EntityManageBasics<Entity> {
         }
         return _entity;
     }
-    
 }
