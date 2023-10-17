@@ -4,7 +4,7 @@ using RegisterSystem;
 
 namespace InTime;
 
-public class CanConfigRegisterManage<T> : RegisterManage<T>, IRegisterManageDefaultConfig where T : RegisterBasics, IDefaultConfig {
+public abstract class CanConfigRegisterManage<T> : RegisterManage<T>, IRegisterManageDefaultConfig where T : RegisterBasics, IDefaultConfig {
     protected Dictionary<T, Action<T>> defaultConfigMap = new Dictionary<T, Action<T>>();
 
     public void defaultConfig(RegisterBasics registerBasics) {

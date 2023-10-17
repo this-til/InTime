@@ -2,7 +2,7 @@
 	<s:String x:Key="/Default/CodeInspection/PencilsConfiguration/ActualSeverity/@EntryValue">INFO</s:String>
 	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;&#xD;
   &lt;Assembly Path="D:\Project\C++++\InTime\Assets\Libs\EventBus.dll" /&gt;&#xD;
-  &lt;Assembly Path="D:\Project\C++++\InTime\Assets\Libs\RegisterSystem.dll" /&gt;&#xD;
   &lt;Assembly Path="D:\Project\C++++\InTime\Assets\Scene\EventBus.dll" /&gt;&#xD;
   &lt;Assembly Path="C:\Users\til\.nuget\packages\godotsharp\4.1.1\lib\net6.0\GodotSharp.dll" /&gt;&#xD;
+  &lt;Assembly Path="D:\Project\C++++\InTime\Assets\Libs\RegisterSystem.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String></wpf:ResourceDictionary>

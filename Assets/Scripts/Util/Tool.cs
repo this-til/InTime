@@ -39,12 +39,21 @@ public class ControlledField<E> {
     }
 }
 
-public class SingletonPatternClass<T> where T : new() {
+public abstract class SingletonPatternClass<T> where T : SingletonPatternClass<T>, new() {
     protected static T? instance;
 
-    public static T getInstance() => instance ??= new T();
+    public static T getInstance() {
+        if (instance is null) {
+            instance = new T();
+            instance.init();
+        }
+        return instance;
+    }
 
     protected SingletonPatternClass() {
+    }
+
+    protected virtual void init() {
     }
 }
 
@@ -221,7 +230,7 @@ public class DataStruct<A, B, C, D, E, F> {
     }
 }
 
-public class LogOut :SingletonPatternClass<LogOut>, ILogOut, EventBus.ILogOut, RegisterSystem.ILogOut {
+public class LogOut : SingletonPatternClass<LogOut>, ILogOut, EventBus.ILogOut, RegisterSystem.ILogOut {
     void ILogOut.Debug(object message) {
         GD.Print(message);
     }

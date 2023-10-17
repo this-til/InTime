@@ -21,16 +21,15 @@ public class World : SingletonPatternClass<World> {
     /// </summary>
     protected readonly Dictionary<Type, IWorldComponent> worldComponents = new Dictionary<Type, IWorldComponent>();
 
-    protected readonly ILog log = LogManager.GetLogger(typeof(World));
+    protected readonly ILogOut log = new LogOut();
 
     protected GraftEventBus eventBus;
     protected GraftRegisterSystem registerSystem;
     protected EntityManage entityManage;
     protected GraftJsonSerializer jsonSerializer;
 
-    public World() {
-
-        //加载所有组件
+    protected override void init() {
+        base.init();
         foreach (var type in Assembly.GetExecutingAssembly().GetTypes()) {
             if (type.IsAbstract) {
                 continue;
@@ -64,6 +63,9 @@ public class World : SingletonPatternClass<World> {
         eventBus.put(this);
         foreach (var type in Assembly.GetExecutingAssembly().GetTypes()) {
             eventBus.put(type);
+        }
+        foreach (var worldComponentsValue in worldComponents.Values) {
+            eventBus.put(worldComponentsValue);
         }
         eventBus.onEvent(new Event.EventWorld.EventWorldInit.EventWorldInitStart());
         IWorldComponent[] executionOrderList = worldComponents.Values.OrderByDescending(c => c.getExecutionOrderList()).ToArray();
@@ -105,7 +107,7 @@ public class World : SingletonPatternClass<World> {
 
     public RegisterSystem.RegisterSystem getRegisterSystem() => registerSystem;
 
-    public ILog getLog() => log;
+    public ILogOut getLog() => log;
     public EntityManage getEntityManage() => entityManage;
 
     public GraftJsonSerializer getJsonSerializer() => jsonSerializer;
@@ -135,6 +137,9 @@ public class GraftRegisterSystem : RegisterSystem.RegisterSystem, IWorldComponen
                 configManage.configRegister(config);
             }
         });
+    }
+
+    protected void onEvent(Event.EventWorld.EventWorldInit.EventComponentInitBasics<GraftRegisterSystem>.EventComponentInitBack @event) {
         initRegisterSystem();
     }
 
@@ -187,34 +192,34 @@ public class GraftJsonSerializer : JsonSerializer, IWorldComponent {
     public class RegisterItemJsonConverter : JsonConverter {
         public override bool CanConvert(Type objectType) => typeof(RegisterBasics).IsAssignableFrom(objectType);
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer) {
-            writer.WriteValue(((RegisterBasics)value).getName());
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer) {
+            writer.WriteValue(value is null ? "@null" : ((RegisterBasics)value).getName());
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer) {
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer) {
             return World.getInstance().getRegisterSystem().getRegisterManageOfRegisterType(objectType)?.get_erase(reader.Value as string ?? "");
         }
     }
 
     public class FiniteStateMachineJsonConverter : JsonConverter {
         public override bool CanConvert(Type objectType) {
-            if (objectType == null) {
-                return false;
-            }
             if (!objectType.IsGenericType) {
                 return false;
             }
             return objectType.GetGenericTypeDefinition() == typeof(FiniteStateMachine<>);
         }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer) =>
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer) {
+            if (value is null) {
+                writer.WriteNull();
+                return;
+            }
             serializer.Serialize(writer, value.GetType().GetField("state", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!.GetValue(value),
                 value.GetType().GetGenericArguments()[0]);
+        }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer) {
-            if (existingValue == null) {
-                existingValue = Activator.CreateInstance(objectType);
-            }
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer) {
+            existingValue ??= Activator.CreateInstance(objectType);
             existingValue?.GetType().GetField("state", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!
                 .SetValue(existingValue, serializer.Deserialize(reader, objectType.GetGenericArguments()[0]));
             return existingValue;
@@ -225,7 +230,7 @@ public class GraftJsonSerializer : JsonSerializer, IWorldComponent {
 public class ConfigManage : IWorldComponent {
     protected GraftJsonSerializer graftJsonSerializer;
 
-    protected Version version;
+    protected string version;
 
     protected readonly Dictionary<IDefaultConfig, FileInfo> needWrite = new Dictionary<IDefaultConfig, FileInfo>();
 
@@ -234,7 +239,7 @@ public class ConfigManage : IWorldComponent {
     public FileInfo mackFile(IDefaultConfig registerBasics) {
         FileInfo fileInfo =
             new FileInfo(Path.Combine(
-                $"{folder.FullName}/{version.ToString()}/{registerBasics.getAsRegisterBasics().getRegisterManage().getCompleteName()}",
+                $"{folder.FullName}/{version}/{registerBasics.getAsRegisterBasics().getRegisterManage().getCompleteName()}",
                 $"{registerBasics.getAsRegisterBasics().getName()}.json"));
         return fileInfo;
     }
@@ -262,8 +267,11 @@ public class ConfigManage : IWorldComponent {
             info => info.GetCustomAttribute<ConfigField>() is not null);
     }
 
-    protected void onEvent(Event.EventWorld.EventWorldInit.EventComponentInitBasics<ConfigManage>.EventComponentInitBack @event) {
-        version = Assembly.GetEntryAssembly()!.GetName().Version;
+    protected void onEvent(Event.EventWorld.EventWorldInit.EventComponentInitBasics<ConfigManage>.EventComponentInit @event) {
+        version = typeof(World).Assembly.GetName().Version?.ToString() ?? "null";
+    }
+
+    protected void onEvent(Event.EventWorld.EventWorldInit.EventComponentInitBasics<ConfigManage>.EventComponentInitBackToBack @event) {
         foreach (var keyValuePair in needWrite) {
             string s = graftJsonSerializer.serialize(keyValuePair.Key, info => info.GetCustomAttribute<ConfigField>() is not null);
             writeFile(keyValuePair.Value, s);
@@ -272,6 +280,11 @@ public class ConfigManage : IWorldComponent {
 
     public static void writeFile(FileInfo fileInfo, string text) {
         StreamWriter streamWriter = null;
+
+        if (!Directory.Exists(fileInfo.DirectoryName)) {
+            Directory.CreateDirectory(fileInfo.DirectoryName);
+        }
+
         try {
             streamWriter = fileInfo.CreateText();
             streamWriter.Write(text);

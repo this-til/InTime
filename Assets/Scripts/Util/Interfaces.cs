@@ -63,6 +63,7 @@ public interface IWorldComponent {
     public void init() {
         Type type = typeof(Event.EventWorld.EventWorldInit.EventComponentInitBasics<>.EventComponentInit).MakeGenericType(GetType());
         World.getInstance().getEventBus().onEvent((Event)Activator.CreateInstance(type, this)!);
+        World.getInstance().getLog().Info($"Init Component : {GetType()}");
     }
 
     /// <summary>
@@ -71,6 +72,7 @@ public interface IWorldComponent {
     public void initBack() {
         Type type = typeof(Event.EventWorld.EventWorldInit.EventComponentInitBasics<>.EventComponentInitBack).MakeGenericType(GetType());
         World.getInstance().getEventBus().onEvent((Event)Activator.CreateInstance(type, this)!);
+        World.getInstance().getLog().Info($"InitBack Component : {GetType()}");
     }
 
     /// <summary>
@@ -79,6 +81,7 @@ public interface IWorldComponent {
     public void initBackToBack() {
         Type type = typeof(Event.EventWorld.EventWorldInit.EventComponentInitBasics<>.EventComponentInitBackToBack).MakeGenericType(GetType());
         World.getInstance().getEventBus().onEvent((Event)Activator.CreateInstance(type, this)!);
+        World.getInstance().getLog().Info($"InitBackToBack Component : {GetType()}");
     }
 
     /// <summary>
@@ -130,4 +133,8 @@ public interface ILogOut {
     void Error(object message);
 
     void Error(object message, Exception exception);
+}
+
+public interface IInit {
+    void init();
 }
