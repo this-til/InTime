@@ -231,30 +231,6 @@ public class DataStruct<A, B, C, D, E, F> {
 }
 
 public class LogOut : SingletonPatternClass<LogOut>, ILogOut, EventBus.ILogOut, RegisterSystem.ILogOut {
-    void ILogOut.Debug(object message) {
-        GD.Print(message);
-    }
-
-    void EventBus.ILogOut.Debug(object message) {
-        GD.Print(message);
-    }
-
-    void RegisterSystem.ILogOut.Debug(object message) {
-        GD.Print(message);
-    }
-
-    void ILogOut.Debug(object message, Exception exception) {
-        GD.Print(message, exception);
-    }
-
-    void EventBus.ILogOut.Debug(object message, Exception exception) {
-        GD.Print(message, exception);
-    }
-
-    void RegisterSystem.ILogOut.Debug(object message, Exception exception) {
-        GD.Print(message, exception);
-    }
-
     void ILogOut.Info(object message) {
         GD.Print(message);
     }
@@ -265,18 +241,6 @@ public class LogOut : SingletonPatternClass<LogOut>, ILogOut, EventBus.ILogOut, 
 
     void RegisterSystem.ILogOut.Info(object message) {
         GD.Print(message);
-    }
-
-    void ILogOut.Info(object message, Exception exception) {
-        GD.Print(message, exception);
-    }
-
-    void EventBus.ILogOut.Info(object message, Exception exception) {
-        GD.Print(message, exception);
-    }
-
-    void RegisterSystem.ILogOut.Info(object message, Exception exception) {
-        GD.Print(message, exception);
     }
 
     void ILogOut.Warn(object message) {
@@ -291,18 +255,6 @@ public class LogOut : SingletonPatternClass<LogOut>, ILogOut, EventBus.ILogOut, 
         GD.PrintRaw(message);
     }
 
-    void ILogOut.Warn(object message, Exception exception) {
-        GD.PrintRaw(message, exception);
-    }
-
-    void EventBus.ILogOut.Warn(object message, Exception exception) {
-        GD.PrintRaw(message, exception);
-    }
-
-    void RegisterSystem.ILogOut.Warn(object message, Exception exception) {
-        GD.PrintRaw(message, exception);
-    }
-
     void ILogOut.Error(object message) {
         GD.PrintErr(message);
     }
@@ -313,18 +265,6 @@ public class LogOut : SingletonPatternClass<LogOut>, ILogOut, EventBus.ILogOut, 
 
     void RegisterSystem.ILogOut.Error(object message) {
         GD.PrintErr(message);
-    }
-
-    void ILogOut.Error(object message, Exception exception) {
-        GD.PrintErr(message, exception);
-    }
-
-    void EventBus.ILogOut.Error(object message, Exception exception) {
-        GD.PrintErr(message, exception);
-    }
-
-    void RegisterSystem.ILogOut.Error(object message, Exception exception) {
-        GD.PrintErr(message, exception);
     }
 }
 

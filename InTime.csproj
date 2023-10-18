@@ -11,7 +11,7 @@
         <Content Include="Assets\Libs\RegisterSystem.pdb" />
         <Reference Include="Assets\Libs\EventBus.dll" />
         <Reference Include="Assets\Libs\RegisterSystem.dll" />
-        <PackageReference Include="log4net" Version="2.0.15" />
+       <!-- <PackageReference Include="log4net" Version="2.0.15" />-->
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
         <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
     </ItemGroup>

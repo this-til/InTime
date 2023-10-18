@@ -1,7 +1,7 @@
 ﻿using Godot;
 using RegisterSystem;
 
-namespace InTime.Resources;
+namespace InTime;
 
 public abstract class ResourcesRegisterManage<T> : RegisterManage<ResourcesRegister<T>> where T : class {
 }

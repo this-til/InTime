@@ -90,6 +90,19 @@ public interface IWorldComponent {
     public virtual int getExecutionOrderList() => 0;
 }
 
+/// <summary>
+/// 组件 - 携带节点
+/// 在初始完成后进行加载节点
+/// </summary>
+public interface IWorldNodeComponent<N> : IWorldComponent where N : Node {
+
+    /// <summary>
+    /// 返回一个节点
+    /// </summary>
+    ResourcesRegister<N> node();
+
+}
+
 public interface IFieldSupply<out E> {
     IEnumerable<E> supply(FieldInfo fieldInfo);
 }
@@ -118,21 +131,11 @@ public interface IEntityLivingMaterialChange {
 }
 
 public interface ILogOut {
-    void Debug(object message);
-
-    void Debug(object message, Exception exception);
-
     void Info(object message);
-
-    void Info(object message, Exception exception);
 
     void Warn(object message);
 
-    void Warn(object message, Exception exception);
-
     void Error(object message);
-
-    void Error(object message, Exception exception);
 }
 
 public interface IInit {

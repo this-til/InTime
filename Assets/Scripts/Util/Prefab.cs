@@ -1,6 +1,10 @@
 ﻿namespace InTime;
 
 public class StringPrefab {
+
+    public const string gameName = "InTime";
+    public const string overallConfigRoute = "InTime/ConfigRoute";
+    
     public const string shield = "shield";
 }
 

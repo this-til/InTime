@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Godot;
 using Newtonsoft.Json.Linq;
 
 namespace InTime;
@@ -1172,7 +1173,7 @@ public abstract class Event : EventBus.Event {
                     /// <summary>
                     /// 下一段动画 
                     /// </summary>
-                     protected AnimationPlayableBehaviour? next;
+                    protected AnimationPlayableBehaviour? next;
 
                     public EventSettlementNextAnimation(EntityLiving entityLiving, AnimationPlayableBehaviour animationPlayableBehaviour) : base(entityLiving,
                         animationPlayableBehaviour) {
@@ -1335,6 +1336,32 @@ public abstract class Event : EventBus.Event {
                     public EventComponentInitBackToBack(T component) : base(component) {
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// 世界更新
+        /// </summary>
+        public class FixedUpdate : EventWorld {
+            public readonly float fixedDeltaTime;
+            public readonly float unscaledFixedDeltaTime;
+
+            public FixedUpdate(float fixedDeltaTime) {
+                this.fixedDeltaTime = fixedDeltaTime;
+                this.unscaledFixedDeltaTime = fixedDeltaTime / (float)Engine.TimeScale;
+            }
+        }
+
+        /// <summary>
+        /// 世界更新，每一帧都在进行
+        /// </summary>
+        public class Update : EventWorld {
+            public readonly float deltaTime;
+            public readonly float unscaledDdeltaDeltaTime;
+
+            public Update(float deltaTime) {
+                this.deltaTime = deltaTime;
+                this.unscaledDdeltaDeltaTime = deltaTime / (float)Engine.TimeScale;
             }
         }
     }

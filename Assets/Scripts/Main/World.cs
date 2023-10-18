@@ -5,17 +5,19 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Xml;
 using EventBus;
-using log4net;
-using log4net.Config;
+using Godot;
 using RegisterSystem;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace InTime;
 
-public class World : SingletonPatternClass<World> {
+public partial class World : Node {
+    protected static World? instance;
+
+    public static World getInstance() => instance!;
+
     /// <summary>
     /// 世界组件  
     /// </summary>
@@ -23,13 +25,8 @@ public class World : SingletonPatternClass<World> {
 
     protected readonly ILogOut log = new LogOut();
 
-    protected GraftEventBus eventBus;
-    protected GraftRegisterSystem registerSystem;
-    protected EntityManage entityManage;
-    protected GraftJsonSerializer jsonSerializer;
-
-    protected override void init() {
-        base.init();
+    public override void _Ready() {
+        base._Ready();
         foreach (var type in Assembly.GetExecutingAssembly().GetTypes()) {
             if (type.IsAbstract) {
                 continue;
@@ -78,8 +75,18 @@ public class World : SingletonPatternClass<World> {
         foreach (var worldComponent in executionOrderList) {
             worldComponent.initBackToBack();
         }
+
+        foreach (var keyValuePair in worldComponents) {
+            
+        }
+
         eventBus.onEvent(new Event.EventWorld.EventWorldInit.EventWorldInitEnd());
     }
+
+    protected GraftEventBus eventBus;
+    protected GraftRegisterSystem registerSystem;
+    protected EntityManage entityManage;
+    protected GraftJsonSerializer jsonSerializer;
 
     public IWorldComponent? getWorldComponent(Type type) {
         if (worldComponents.ContainsKey(type)) {
@@ -267,6 +274,10 @@ public class ConfigManage : IWorldComponent {
             info => info.GetCustomAttribute<ConfigField>() is not null);
     }
 
+    public void writeRegister(IDefaultConfig defaultConfig) {
+        writeFile(mackFile(defaultConfig), graftJsonSerializer.serialize(defaultConfig, info => info.GetCustomAttribute<ConfigField>() is not null));
+    }
+
     protected void onEvent(Event.EventWorld.EventWorldInit.EventComponentInitBasics<ConfigManage>.EventComponentInit @event) {
         version = typeof(World).Assembly.GetName().Version?.ToString() ?? "null";
     }
@@ -359,4 +370,10 @@ public class EntityManage : EntityManageBasics<Entity> {
         }
         return _entity;
     }
+}
+
+/// <summary>
+/// 管理相关的UI组件
+/// </summary>
+public class UIManage : IWorldComponent {
 }

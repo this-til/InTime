@@ -254,3 +254,22 @@ public enum AttackProcess {
     /// </summary>
     end,
 }
+
+public enum DownType {
+    timeIsDown,
+
+    /// <summary>
+    /// 被摁下
+    /// </summary>
+    isDown,
+
+    /// <summary>
+    /// 连击
+    /// </summary>
+    doubleHit,
+
+    /// <summary>
+    /// 一直
+    /// </summary>
+    always
+}
