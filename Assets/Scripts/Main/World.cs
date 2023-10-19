@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -26,7 +26,17 @@ public partial class World : Node {
     protected readonly ILogOut log = new LogOut();
 
     public override void _Ready() {
+        instance = this;
         base._Ready();
+
+        this.handleAll<IWorldComponent>(component => {
+            if (worldComponents.ContainsKey(component.GetType())) {
+                getLog().Error("WorldComponent重复");
+                return;
+            }
+            worldComponents.Add(component.GetType(), component);
+        });
+
         foreach (var type in Assembly.GetExecutingAssembly().GetTypes()) {
             if (type.IsAbstract) {
                 continue;
@@ -49,7 +59,13 @@ public partial class World : Node {
             if (!typeof(IWorldComponent).IsAssignableFrom(type)) {
                 continue;
             }
+            if (worldComponents.ContainsKey(type)) {
+                continue;
+            }
             worldComponents.Add(type, (IWorldComponent)Activator.CreateInstance(type)!);
+            if (typeof(Node).IsAssignableFrom(type)) {
+                AddChild(worldComponents[type] as Node);
+            }
         }
 
         voluntarilyAssignment(this);
@@ -57,7 +73,9 @@ public partial class World : Node {
             voluntarilyAssignment(worldComponentsValue);
         }
 
+        eventBus.setLog(LogOut.getInstance());
         eventBus.put(this);
+
         foreach (var type in Assembly.GetExecutingAssembly().GetTypes()) {
             eventBus.put(type);
         }
@@ -75,11 +93,6 @@ public partial class World : Node {
         foreach (var worldComponent in executionOrderList) {
             worldComponent.initBackToBack();
         }
-
-        foreach (var keyValuePair in worldComponents) {
-            
-        }
-
         eventBus.onEvent(new Event.EventWorld.EventWorldInit.EventWorldInitEnd());
     }
 
@@ -110,6 +123,16 @@ public partial class World : Node {
         }
     }
 
+    public sealed override void _PhysicsProcess(double delta) {
+        base._PhysicsProcess(delta);
+        getEventBus().onEvent(new Event.EventWorld.FixedUpdate((float)delta));
+    }
+
+    public sealed override void _Process(double delta) {
+        base._Process(delta);
+        getEventBus().onEvent(new Event.EventWorld.Update((float)delta));
+    }
+
     public IEventBus getEventBus() => eventBus;
 
     public RegisterSystem.RegisterSystem getRegisterSystem() => registerSystem;
@@ -122,10 +145,6 @@ public partial class World : Node {
 
 public class GraftEventBus : EventBus.EventBus, IWorldComponent {
     public int getExecutionOrderList() => Int32.MaxValue;
-
-    protected void onEvent(Event.EventWorld.EventWorldInit.EventComponentInitBasics<GraftEventBus>.EventComponentInit @event) {
-        setLog(LogOut.getInstance());
-    }
 }
 
 public class GraftRegisterSystem : RegisterSystem.RegisterSystem, IWorldComponent {
@@ -270,7 +289,7 @@ public class ConfigManage : IWorldComponent {
 
         graftJsonSerializer.deserialize(
             registerBasics,
-            graftJsonSerializer.Deserialize<JObject>(new JsonTextReader(new StreamReader(s))),
+            graftJsonSerializer.Deserialize<JObject>(new JsonTextReader(new StringReader(s))),
             info => info.GetCustomAttribute<ConfigField>() is not null);
     }
 
@@ -336,6 +355,7 @@ public abstract class EntityManageBasics<E> : IWorldComponent where E : Entity {
             return;
         }
         entity.Add(eventEntity);
+        //eventEntity.addNextTimeRun(0, () => eventEntity.Reparent(this));
     }
 
     protected void pnEvent(Event.EventEntity.EventEntityDestroy @event) {
@@ -372,8 +392,34 @@ public class EntityManage : EntityManageBasics<Entity> {
     }
 }
 
+public class ResourceFileManage : IWorldComponent {
+    protected Dictionary<Type, string> resourceExtensions = new Dictionary<Type, string>() {
+        { typeof(PackedScene), ".tscn" },
+        { typeof(Script), ".cs" },
+        { typeof(Texture), ".png" },
+        { typeof(Font), ".ttf" },
+        { typeof(Shader), ".shader" },
+        { typeof(Material), ".material" },
+        { typeof(Mesh), ".obj" },
+        { typeof(Animation), ".anim" },
+        { typeof(AudioStream), ".wav" },
+        { typeof(VideoStream), ".webm" },
+        { typeof(TileSet), ".tres" },
+        { typeof(TileMap), ".tscn" },
+        //{ typeof(StreamTextur), ".webm" },
+        { typeof(Curve), ".tres" },
+        { typeof(Gradient), ".tres" },
+        { typeof(StyleBox), ".tres" },
+        { typeof(Theme), ".tres" }
+    };
+
+    public bool hasFileExtension(Type type) => resourceExtensions.ContainsKey(type);
+
+    public string getFileExtension(Type type) => resourceExtensions[type];
+}
+
 /// <summary>
 /// 管理相关的UI组件
 /// </summary>
-public class UIManage : IWorldComponent {
+public partial class UIManage : Node2D, IWorldComponent {
 }

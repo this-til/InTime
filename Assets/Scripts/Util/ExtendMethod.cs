@@ -302,3 +302,14 @@ public static class JObjectExtendMethod {
 		return default;
 	}
 }
+
+public static class NodeExtendMethod {
+	public static void handleAll<T>(this Node node, Action<T> action) where T : class {
+		if (node is T tNode) {
+			action(tNode);
+		}
+		foreach (var child in node.GetChildren()) {
+			handleAll(child, action);
+		}
+	}
+}

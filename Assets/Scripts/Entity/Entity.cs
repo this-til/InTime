@@ -3,7 +3,6 @@ using System.Reflection;
 using EventBus;
 using Godot;
 using Godot.Collections;
-using log4net;
 using Newtonsoft.Json.Linq;
 
 namespace InTime;
@@ -55,11 +54,6 @@ public partial class Entity : Node3D {
     protected readonly IEventBus eventsRunPackGather = new EventBus.EventBus();
 
     /// <summary>
-    /// 顶层节点
-    /// </summary>
-    protected Node? baseNode;
-
-    /// <summary>
     /// 自定义数据
     /// </summary>
     [SaveField] protected JObject? customData = new JObject();
@@ -68,7 +62,6 @@ public partial class Entity : Node3D {
 
     public sealed override void _EnterTree() {
         base._EnterTree();
-        baseNode = GetParent();
         entityLifeState = EntityLifeState.enterTree;
         enterTreeNecessary();
         enterTreeInit();
@@ -253,7 +246,7 @@ public partial class Entity : Node3D {
         if (end) {
             entity.unbound();
         }
-        entity.Reparent(entity.baseNode);
+        entity.Reparent(World.getInstance());
         return entity;
     }
 

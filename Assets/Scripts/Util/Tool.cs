@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Godot;
-using log4net;
-using RegisterSystem;
 
 namespace InTime;
 

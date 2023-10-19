@@ -7,8 +7,8 @@ public class AllKeyAxis : RegisterManage<KeyAxis> {
     public static KeyAxis AD;
     public static KeyAxis WS;
 
-    public override void awakeInit() {
-        base.awakeInit();
+    public override void init() {
+        base.init();
         AD.initSetKeyPack(AllKeyPack.A, AllKeyPack.D);
         WS.initSetKeyPack(AllKeyPack.W, AllKeyPack.S);
     }

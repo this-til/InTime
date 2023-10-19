@@ -61,46 +61,33 @@ public interface IWorldComponent {
     /// 初始化
     /// </summary>
     public void init() {
+        World.getInstance().getLog().Info($"Init Component : {GetType()}");
         Type type = typeof(Event.EventWorld.EventWorldInit.EventComponentInitBasics<>.EventComponentInit).MakeGenericType(GetType());
         World.getInstance().getEventBus().onEvent((Event)Activator.CreateInstance(type, this)!);
-        World.getInstance().getLog().Info($"Init Component : {GetType()}");
     }
 
     /// <summary>
     /// 在第一次初始化后再一次的回调
     /// </summary>
     public void initBack() {
+        World.getInstance().getLog().Info($"InitBack Component : {GetType()}");
         Type type = typeof(Event.EventWorld.EventWorldInit.EventComponentInitBasics<>.EventComponentInitBack).MakeGenericType(GetType());
         World.getInstance().getEventBus().onEvent((Event)Activator.CreateInstance(type, this)!);
-        World.getInstance().getLog().Info($"InitBack Component : {GetType()}");
     }
 
     /// <summary>
     /// 第二次
     /// </summary>
     public void initBackToBack() {
+        World.getInstance().getLog().Info($"InitBackToBack Component : {GetType()}");
         Type type = typeof(Event.EventWorld.EventWorldInit.EventComponentInitBasics<>.EventComponentInitBackToBack).MakeGenericType(GetType());
         World.getInstance().getEventBus().onEvent((Event)Activator.CreateInstance(type, this)!);
-        World.getInstance().getLog().Info($"InitBackToBack Component : {GetType()}");
     }
 
     /// <summary>
     /// 获取执行顺序
     /// </summary>
     public virtual int getExecutionOrderList() => 0;
-}
-
-/// <summary>
-/// 组件 - 携带节点
-/// 在初始完成后进行加载节点
-/// </summary>
-public interface IWorldNodeComponent<N> : IWorldComponent where N : Node {
-
-    /// <summary>
-    /// 返回一个节点
-    /// </summary>
-    ResourcesRegister<N> node();
-
 }
 
 public interface IFieldSupply<out E> {

@@ -4,7 +4,6 @@ using System.IO;
 using System.Reflection;
 using EventBus;
 using Godot;
-using log4net.Util;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RegisterSystem;
@@ -81,38 +80,39 @@ public partial class EntityLiving : Entity {
 	/// <summary>
 	/// 站立动画借点
 	/// </summary>
-	[AnimationPlayableBehaviourData(AnimationType.loop, (int)AnimationLimitLevel.ordinary)]
-	protected AnimationPlayableBehaviour standAnimationPlayableBehaviour;
+	protected readonly AnimationPlayableBehaviour standAnimationPlayableBehaviour =
+		new AnimationPlayableBehaviour(nameof(standAnimationPlayableBehaviour), AnimationType.loop, (int)AnimationLimitLevel.ordinary);
 
 	/// <summary>
 	/// 移动动画 
 	/// </summary>
-	[AnimationPlayableBehaviourData(AnimationType.loop | AnimationType.move, (int)AnimationLimitLevel.ordinary)]
-	protected AnimationPlayableBehaviour moveAnimationPlayableBehaviour;
+	protected readonly AnimationPlayableBehaviour moveAnimationPlayableBehaviour =
+		new AnimationPlayableBehaviour(nameof(moveAnimationPlayableBehaviour), AnimationType.loop | AnimationType.move, (int)AnimationLimitLevel.ordinary);
 
 	/// <summary>
 	/// 滞空动画
 	/// </summary>
-	[AnimationPlayableBehaviourData(AnimationType.loop | AnimationType.air, (int)AnimationLimitLevel.ordinary)]
-	protected AnimationPlayableBehaviour airAnimationPlayableBehaviour;
+	protected readonly AnimationPlayableBehaviour airAnimationPlayableBehaviour =
+		new AnimationPlayableBehaviour(nameof(airAnimationPlayableBehaviour), AnimationType.loop | AnimationType.air, (int)AnimationLimitLevel.ordinary);
 
 	/// <summary>
 	/// 打断动画
 	/// </summary>
-	[AnimationPlayableBehaviourData(AnimationType.ordinary, (int)AnimationLimitLevel.controlled)]
-	protected AnimationPlayableBehaviour interruptAnimationPlayableBehaviour;
+	protected readonly AnimationPlayableBehaviour interruptAnimationPlayableBehaviour =
+		new AnimationPlayableBehaviour(nameof(interruptAnimationPlayableBehaviour), AnimationType.ordinary, (int)AnimationLimitLevel.controlled);
 
+	//TODO
 	/// <summary>
 	/// 击飞动画
 	/// </summary>
-	[Obsolete] [AnimationPlayableBehaviourData(AnimationType.loop | AnimationType.ordinary, (int)AnimationLimitLevel.controlled)]
-	protected AnimationPlayableBehaviour blowUpAnimationPlayableBehaviour;
+	//[Obsolete] [AnimationPlayableBehaviourData(AnimationType.loop | AnimationType.ordinary, (int)AnimationLimitLevel.controlled)]
+	//protected AnimationPlayableBehaviour blowUpAnimationPlayableBehaviour;
 
 	/// <summary>
 	/// 死亡动画节点
 	/// </summary>
-	[AnimationPlayableBehaviourData(AnimationType.death, (int)AnimationLimitLevel.death)]
-	protected AnimationPlayableBehaviour deathAnimationPlayableBehaviour;
+	protected readonly AnimationPlayableBehaviour deathAnimationPlayableBehaviour =
+		new AnimationPlayableBehaviour(nameof(deathAnimationPlayableBehaviour), AnimationType.death, (int)AnimationLimitLevel.death);
 
 	[SaveField] protected AttributeStack attribute = new AttributeStack();
 
@@ -201,7 +201,6 @@ public partial class EntityLiving : Entity {
 		base.enterTreeInitField(fieldInfo, fieldObj);
 		switch (fieldObj) {
 			case AnimationPlayableBehaviour animationPlayableBehaviour:
-				animationPlayableBehaviour.name = fieldInfo.Name;
 				if (animationPlayableBehaviourName.ContainsKey(animationPlayableBehaviour.name)) {
 					throw new Exception();
 				}
@@ -2157,56 +2156,62 @@ public class AnimationPlayableBehaviour {
 	/// <summary>
 	/// 动画对象
 	/// </summary>
-	protected internal Animation animationClip;
+	public Animation animationClip;
 
 	/// <summary>
 	/// 动画的名称，是字段名称
 	/// </summary>
-	protected internal string name = String.Empty;
+	public readonly string name;
 
 	/// <summary>
 	/// 基础速度
 	/// </summary>
-	protected internal float seepBasics = 1;
+	public float seepBasics = 1;
 
 	/// <summary>
 	/// 混合时间
 	/// NaN
 	/// </summary>
-	protected internal float blendTime = 0.1f;
+	public float blendTime = 0.1f;
 
 	/// <summary>
 	/// 重播时间
 	/// Nan
 	/// </summary>
-	protected internal float replayTime = Single.NaN;
+	public float replayTime = Single.NaN;
 
 	/// <summary>
 	/// 前摇结束时间
 	/// NaN
 	/// </summary>
-	protected internal float forwardTime = Single.NaN;
+	public float forwardTime = Single.NaN;
 
 	/// <summary>
 	/// 后摇开始时间
 	/// NaN
 	/// </summary>
-	protected internal float backTime = Single.NaN;
+	public float backTime = Single.NaN;
 
 	/// <summary>
 	/// 事件点
 	/// </summary>
-	protected internal List<DataStruct<float, Action>>? posAction;
+	public List<DataStruct<float, Action>>? posAction;
 
 	/// <summary>
 	/// 动作的类型
 	/// </summary>
-	protected internal AnimationType animationType;
+	public readonly AnimationType animationType;
 
 	/// <summary>
 	/// 限制等级
 	/// </summary>
-	protected internal int limitLevel;
+	public readonly int limitLevel;
+
+	public AnimationPlayableBehaviour(string name, AnimationType animationType, int limitLevel) {
+		this.animationType = animationType;
+		this.limitLevel = limitLevel;
+		this.name = name;
+	}
 
 	public AnimationPlayableBehaviour addPosAction(float pos, Action action) {
 		posAction ??= new List<DataStruct<float, Action>>();
